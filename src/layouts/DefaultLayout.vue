@@ -29,13 +29,7 @@
       <div class="ui fixed inverted menu">
         <div class="ui container">
           <a href="/" class="header item">Micro-Frontends</a>
-          <router-link
-            v-for="route in routes"
-            :key="route.path"
-            :to="route.path"
-            class="item"
-            active-class="active"
-          >
+          <router-link v-for="route in routes" :key="route.path" :to="route.path" class="item" active-class="active">
             {{ route.meta?.title || route.name }}
           </router-link>
         </div>
@@ -55,7 +49,7 @@ import { useRouter } from 'vue-router'
 const uiFramework = import.meta.env.VITE_UI_FRAMEWORK || 'bootstrap'
 
 const router = useRouter()
-const routes = computed(() => 
+const routes = computed(() =>
   router.getRoutes()
     .filter(route => !route.path.includes(':') && route.path !== '/')
 )
@@ -70,13 +64,18 @@ onMounted(async () => {
     link.rel = 'stylesheet'
     link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'
     document.head.appendChild(link)
+
+    const link2 = document.createElement('link')
+    link2.rel = 'stylesheet'
+    link2.href = 'https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.3/cerulean/bootstrap.min.css'
+    document.head.appendChild(link2)
   } else {
     // Load Fomantic UI CSS
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.href = 'https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.0/dist/semantic.min.css'
     document.head.appendChild(link)
-    
+
     // Load Fomantic UI JS
     const script = document.createElement('script')
     script.src = 'https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.0/dist/semantic.min.js'
