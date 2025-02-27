@@ -11,6 +11,7 @@ export interface MicroFrontendConfig {
         order?: number
     }
 }
+const UI_FRAMEWORK = import.meta.env.VITE_UI_FRAMEWORK || 'bootstrap'
 
 export const config: MicroFrontendConfig = {
     name: 'Home',
@@ -24,7 +25,10 @@ export const config: MicroFrontendConfig = {
         {
             path: '/',
             name: 'home',
-            component: () => import('./views/Home.vue'),
+            component: UI_FRAMEWORK === 'bootstrap'
+                ? /* @vite-ignore */ () => import('./views/HomeBootstrap.vue')
+                : /* @vite-ignore */ () => import('./views/HomeFomantic.vue'),
+            
             meta: {
                 title: 'Home'
             }

@@ -8,17 +8,17 @@ const UI_FRAMEWORK = import.meta.env.VITE_UI_FRAMEWORK || 'bootstrap'
 // Function to load all microfrontend configurations
 const loadMicroFrontendConfigs = () => {
   const configs: MicroFrontendConfig[] = []
-  
+
   // Import all config.ts files from _frontends subdirectories
   const modules = import.meta.glob('../_frontends/**/**/config.ts', { eager: true })
-  
+
   for (const path in modules) {
     const module = modules[path] as { config: MicroFrontendConfig }
     if (module && module.config) {
       configs.push(module.config)
     }
   }
-  
+
   return configs
 }
 
@@ -27,7 +27,9 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    component: () => import('../_frontends/website/home/views/Home.vue'),
+    component: UI_FRAMEWORK === 'bootstrap'
+      ? /* @vite-ignore */ () => import('../_frontends/website/home/views/HomeBootstrap.vue')
+      : /* @vite-ignore */ () => import('../_frontends/website/home/views/HomeFomantic.vue'),
     meta: {
       layout: 'WebsiteLayout'
     }
@@ -35,7 +37,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'login',
-    component: UI_FRAMEWORK === 'bootstrap' 
+    component: UI_FRAMEWORK === 'bootstrap'
       ? /* @vite-ignore */ () => import('../layouts/auth/bootstrap/LoginLayout.vue')
       : /* @vite-ignore */ () => import('../layouts/auth/fomantic/LoginLayout.vue'),
     meta: {
@@ -80,7 +82,7 @@ router.beforeEach((to, from, next) => {
 
     if (!customToken || !idToken || !user) {
       // If any required auth data is missing, redirect to login
-      next({ 
+      next({
         path: '/login',
         query: { redirect: to.fullPath } // Save intended destination
       })
