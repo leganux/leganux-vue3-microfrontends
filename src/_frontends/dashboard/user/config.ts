@@ -1,4 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
+// Get UI framework from environment variable
+const UI_FRAMEWORK = import.meta.env.VITE_UI_FRAMEWORK || 'bootstrap'
 
 export interface MicroFrontendConfig {
     name: string
@@ -26,25 +28,11 @@ export const config: MicroFrontendConfig = {
         {
             path: '/users',
             name: 'users',
-            component: () => import('./views/UserList.vue'),
+            component: UI_FRAMEWORK === 'bootstrap'
+                ? /* @vite-ignore */ () => import('./views/UserBootstrap.vue')
+                : /* @vite-ignore */ () => import('./views/UserFomantic.vue'),
             meta: {
                 title: 'Users List'
-            }
-        },
-        {
-            path: '/users/create',
-            name: 'users-create',
-            component: () => import('./views/UserCreate.vue'),
-            meta: {
-                title: 'Create User'
-            }
-        },
-        {
-            path: '/users/:id/edit',
-            name: 'users-edit',
-            component: () => import('./views/UserEdit.vue'),
-            meta: {
-                title: 'Edit User'
             }
         }
     ]

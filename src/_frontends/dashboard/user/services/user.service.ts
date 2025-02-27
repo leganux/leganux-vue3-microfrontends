@@ -1,80 +1,63 @@
 import type { User, CreateUserDto, UpdateUserDto } from '../interfaces/user.interface'
+import axios from 'axios'
 
-// Mock data
-const mockUsers: User[] = [
-  {
-    _id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01')
-  },
-  {
-    _id: '2',
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    createdAt: new Date('2024-01-02'),
-    updatedAt: new Date('2024-01-02')
-  },
-  {
-    _id: '3',
-    name: 'Bob Johnson',
-    email: 'bob@example.com',
-    createdAt: new Date('2024-01-03'),
-    updatedAt: new Date('2024-01-03')
-  }
-]
+const API_URL = import.meta.env.VITE_API_URL
 
 export const useUserService = () => {
   const getUsers = async (): Promise<User[]> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    return [...mockUsers]
+    const response = await axios.get(`${API_URL}/users`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('idToken')}`
+      }
+    })
+    return response.data.data
   }
 
   const getUserById = async (id: string): Promise<User> => {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    const user = mockUsers.find(u => u._id === id)
-    if (!user) {
-      throw new Error('User not found')
-    }
-    return { ...user }
+    const response = await axios.get(`${API_URL}/users/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('idToken')}`
+      }
+    })
+    return response.data.data
   }
 
   const createUser = async (userData: CreateUserDto): Promise<User> => {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    const newUser: User = {
-      _id: String(mockUsers.length + 1),
-      ...userData,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-    mockUsers.push(newUser)
-    return { ...newUser }
+    const response = await axios.post(`${API_URL}/users`, userData, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('idToken')}`
+      }
+    })
+    return response.data.data
   }
 
   const updateUser = async (id: string, userData: UpdateUserDto): Promise<User> => {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    const index = mockUsers.findIndex(u => u._id === id)
-    if (index === -1) {
-      throw new Error('User not found')
-    }
-    const updatedUser: User = {
-      ...mockUsers[index],
-      ...userData,
-      updatedAt: new Date()
-    }
-    mockUsers[index] = updatedUser
-    return { ...updatedUser }
+    const response = await axios.put(`${API_URL}/users/${id}`, userData, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('idToken')}`
+      }
+    })
+    return response.data.data
   }
 
   const deleteUser = async (id: string): Promise<void> => {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    const index = mockUsers.findIndex(u => u._id === id)
-    if (index === -1) {
-      throw new Error('User not found')
+    await axios.delete(`${API_URL}/users/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('idToken')}`
+      }
+    })
+  }
+
+  const updateField = async (id: string, field: string, value: any): Promise<User> => {
+    const updateData = {
+      [field]: value
     }
-    mockUsers.splice(index, 1)
+    const response = await axios.put(`${API_URL}/users/${id}`, updateData, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('idToken')}`
+      }
+    })
+    return response.data.data
   }
 
   return {
@@ -82,6 +65,7 @@ export const useUserService = () => {
     getUserById,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    updateField
   }
 }
