@@ -4,7 +4,7 @@
     <template v-if="uiFramework === 'bootstrap'">
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-          <a class="navbar-brand" href="/">Micro-Frontends</a>
+          <a class="navbar-brand" href="/public">Micro-Frontends</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -28,7 +28,7 @@
     <template v-else>
       <div class="ui fixed inverted menu">
         <div class="ui container">
-          <a href="/" class="header item">Micro-Frontends</a>
+          <a href="/public" class="header item">Micro-Frontends</a>
           <router-link v-for="route in routes" :key="route.path" :to="route.path" class="item" active-class="active">
             {{ route.meta?.title || route.name }}
           </router-link>

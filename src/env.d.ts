@@ -1,13 +1,5 @@
 /// <reference types="vite/client" />
-
-interface ImportMetaEnv {
-  readonly VITE_API_BASE_URL: string
-  readonly VITE_UI_FRAMEWORK: 'bootstrap' | 'fomantic'
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv
-}
+/// <reference types="jquery" />
 
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
@@ -15,7 +7,26 @@ declare module '*.vue' {
   export default component
 }
 
-declare module 'bootstrap' {
-  const bootstrap: any
-  export default bootstrap
+// Declare modules
+declare module 'bootstrap/dist/js/bootstrap.bundle.min.js'
+declare module 'jquery/dist/jquery.min.js'
+declare module 'fomantic-ui/dist/semantic.min.js'
+
+// Extend Window interface
+declare global {
+  interface Window {
+    bootstrap: any
+    jQuery: JQueryStatic
+    $: JQueryStatic
+  }
+}
+
+// Extend ImportMeta
+interface ImportMetaEnv {
+  readonly VITE_UI_FRAMEWORK: 'bootstrap' | 'fomantic'
+  readonly VITE_API_BASE_URL: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
 }

@@ -1,20 +1,9 @@
 {
-  "extends": "@tsconfig/node22/tsconfig.json",
-  "include": [
-    "vite.config.*",
-    "vitest.config.*",
-    "cypress.config.*",
-    "nightwatch.conf.*",
-    "playwright.config.*",
-    "eslint.config.*",
-    "scripts/**/*"
-  ],
   "compilerOptions": {
-    "noEmit": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "composite": true,
     "module": "ESNext",
     "moduleResolution": "Node",
-    "allowJs": true,
-    "types": ["node"]
-  }
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
 }
