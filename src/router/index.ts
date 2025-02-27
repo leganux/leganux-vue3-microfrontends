@@ -72,12 +72,36 @@ const router = createRouter({
 
 // Navigation guard for dashboard routes
 router.beforeEach((to, from, next) => {
-  // If route is in dashboard and not logged in, redirect to login
+  // If route is in dashboard, check authentication
   if (to.path.startsWith('/dashboard')) {
-    // Add your auth check logic here
-    // For now, we'll just let them through
-    next()
+    const customToken = localStorage.getItem('customToken')
+    const idToken = localStorage.getItem('idToken')
+    const user = localStorage.getItem('user')
+
+    if (!customToken || !idToken || !user) {
+      // If any required auth data is missing, redirect to login
+      next({ 
+        path: '/login',
+        query: { redirect: to.fullPath } // Save intended destination
+      })
+    } else {
+      // User is authenticated, proceed to dashboard
+      next()
+    }
+  } else if (to.path === '/login') {
+    // If user is already authenticated and tries to access login page
+    const customToken = localStorage.getItem('customToken')
+    const idToken = localStorage.getItem('idToken')
+    const user = localStorage.getItem('user')
+
+    if (customToken && idToken && user) {
+      // Redirect to dashboard if already authenticated
+      next('/dashboard')
+    } else {
+      next()
+    }
   } else {
+    // For non-dashboard routes, proceed normally
     next()
   }
 })
