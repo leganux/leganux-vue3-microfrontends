@@ -94,7 +94,7 @@
                 <span>Settings</span>
               </a>
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">
+              <a class="dropdown-item" href="#" @click="handleLogout">
                 <i class="bi bi-box-arrow-right"></i>
                 <span>Logout</span>
               </a>
@@ -191,6 +191,11 @@ const toggleNotifications = () => {
 const toggleProfile = () => {
   showProfile.value = !showProfile.value
   showNotifications.value = false
+}
+
+const handleLogout = () => {
+  localStorage.clear()
+  router.push('/')
 }
 </script>
 

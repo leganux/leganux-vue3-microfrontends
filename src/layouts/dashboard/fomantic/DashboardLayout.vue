@@ -188,8 +188,8 @@ const handleSettings = () => {
 
 const handleLogout = () => {
   showProfile.value = false
-  // Add logout logic here
-  console.log('Logout clicked')
+  localStorage.clear()
+  router.push('/')
 }
 
 const handleViewAllNotifications = () => {

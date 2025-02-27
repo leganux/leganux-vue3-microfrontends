@@ -4,11 +4,11 @@
       <!-- Left Side - Image -->
       <div class="eight wide column only computer">
         <div class="auth-image-wrapper">
-          <img src="https://source.unsplash.com/random/800x1200/?technology" alt="Login" class="auth-image">
+          <img src="https://images.pexels.com/photos/1544420/pexels-photo-1544420.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Login" class="auth-image">
           <div class="auth-image-overlay"></div>
           <div class="auth-image-text">
             <h1 class="ui inverted header">Welcome Back!</h1>
-            <p class="ui inverted text">Sign in to access your dashboard and manage your account.</p>
+            <p style="color: antiquewhite;" class="ui teal text">Sign in to access your dashboard and manage your account.</p>
           </div>
         </div>
       </div>

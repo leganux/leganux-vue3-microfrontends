@@ -5,11 +5,11 @@
         <!-- Left Side - Image -->
         <div class="col-lg-6 d-none d-lg-flex align-items-center justify-content-center">
           <div class="auth-image-wrapper">
-            <img src="https://source.unsplash.com/random/800x1200/?technology" alt="Login" class="auth-image">
+            <img src="https://images.pexels.com/photos/1544420/pexels-photo-1544420.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Login" class="auth-image">
             <div class="auth-image-overlay"></div>
             <div class="auth-image-text">
               <h2 class="text-white mb-4">Welcome Back!</h2>
-              <p class="text-white-50">Sign in to access your dashboard and manage your account.</p>
+              <p class="text-white">Sign in to access your dashboard and manage your account.</p>
             </div>
           </div>
         </div>
