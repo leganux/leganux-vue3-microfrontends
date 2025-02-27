@@ -78,6 +78,7 @@ import type { TableColumn, DatatableProps, ColumnDefinition, DynamicButton } fro
 import type { CreateUserDto, UpdateUserDto } from '../interfaces/user.interface'
 import DatatableComponent from '@/components/dashboard/bootstrap/DatatableComponent.vue'
 import { useUserService } from '../services/user.service'
+import { authService } from '@/services/auth.service'
 // @ts-ignore - No type definitions available
 import Swal from 'sweetalert2'
 // @ts-ignore - No type definitions available
@@ -133,7 +134,14 @@ const handleSubmit = async () => {
       }
       await userService.updateUser(editingId.value, updateData)
     } else {
-      await userService.createUser(userForm.value as CreateUserDto)
+      const createData: CreateUserDto = {
+        name: userForm.value.name,
+        email: userForm.value.email,
+        password: userForm.value.password,
+        role: userForm.value.role,
+        photoURL: userForm.value.photoURL || ''
+      }
+      await userService.createUser(createData)
     }
     modal.hide()
     resetForm()
@@ -201,6 +209,39 @@ const handleCheckbox = async (id: string, field: string, isChecked: boolean) => 
 }
 
 const handleDynamicAction = async ({ action, id }: { action: string, id: string }) => {
+  if (action === 'reset-password') {
+    try {
+      const { value: email } = await Swal.fire({
+        title: 'Reset Password',
+        input: 'email',
+        inputLabel: 'Email address',
+        inputPlaceholder: 'Enter email address',
+        showCancelButton: true,
+        confirmButtonText: 'Reset Password',
+        confirmButtonColor: '#27b30d',
+        cancelButtonText: 'Cancel',
+        cancelButtonColor: '#dd1111',
+      });
+
+      if (email) {
+        await authService.resetPassword(email);
+        await Swal.fire({
+          title: 'Success',
+          text: 'Password reset email has been sent',
+          icon: 'success',
+          confirmButtonColor: '#27b30d'
+        });
+      }
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      await Swal.fire({
+        title: 'Error',
+        text: error instanceof Error ? error.message : 'Failed to reset password',
+        icon: 'error',
+        confirmButtonColor: '#dd1111'
+      });
+    }
+  }
 }
 
 const columns = ref<TableColumn[]>([
