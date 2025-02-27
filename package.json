@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "create-microfrontend": "tsx scripts/create-microfrontend.ts"
+    "create:microfrontend": "node scripts/create-microfrontend.js"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
