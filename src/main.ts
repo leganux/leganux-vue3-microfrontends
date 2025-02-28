@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import { Ckeditor } from '@ckeditor/ckeditor5-vue'
 
 // Get UI framework from environment variable
 const UI_FRAMEWORK = import.meta.env.VITE_UI_FRAMEWORK || 'bootstrap'
@@ -42,6 +43,7 @@ const initApp = () => {
 
   app.use(pinia)
   app.use(router)
+  app.component('ckeditor', Ckeditor)
 
   app.mount('#app')
 }
@@ -54,7 +56,7 @@ if (UI_FRAMEWORK === 'bootstrap') {
   // For Fomantic UI, wait for jQuery to load
   loadFomanticUI()
   window.addEventListener('load', () => {
-    if (window.jQuery) {
+    if ((window as any).jQuery) {
       initApp()
     } else {
       console.error('jQuery failed to load')
