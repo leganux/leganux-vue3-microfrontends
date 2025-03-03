@@ -60,42 +60,42 @@
               <div v-if="message.content && !isMediaMessage(message)">{{ message.content }}</div>
               
               <!-- Media Content -->
-              <div v-if="message.mediaUrl" class="media-content">
+              <div v-if="message.file" class="media-content">
                 <!-- Image -->
-                <div v-if="message.type === 'image' || (message.mediaUrl && message.mediaUrl.endsWith('.jpg'))">
-                  <img :src="getMediaUrl(message.mediaUrl)" class="img-fluid mt-2" alt="Image" />
+                <div v-if="message.type === 'image' || (message.file.mimeType && message.file.mimeType.startsWith('image/'))">
+                  <img :src="getMediaUrl(message.file._id)" class="img-fluid mt-2" alt="Image" />
                   <div v-if="message.content" class="media-caption">{{ message.content }}</div>
-                  <div v-if="message.file" class="file-info">
+                  <div class="file-info">
                     <small>{{ formatFileSize(message.file.size) }} - {{ message.file.originalName }}</small>
                   </div>
                 </div>
 
                 <!-- Video -->
-                <div v-if="message.type === 'video' || (message.mediaUrl && message.mediaUrl.endsWith('.mp4'))">
+                <div v-if="message.type === 'video' || (message.file.mimeType && message.file.mimeType.startsWith('video/'))">
                   <video controls class="img-fluid mt-2">
-                    <source :src="getMediaUrl(message.mediaUrl)" type="video/mp4">
+                    <source :src="getMediaUrl(message.file._id)" type="video/mp4">
                     Your browser does not support the video tag.
                   </video>
                   <div v-if="message.content" class="media-caption">{{ message.content }}</div>
-                  <div v-if="message.file" class="file-info">
+                  <div class="file-info">
                     <small>{{ formatFileSize(message.file.size) }} - {{ message.file.originalName }}</small>
                   </div>
                 </div>
 
                 <!-- Audio -->
-                <div v-if="message.type === 'audio' || (message.mediaUrl && message.mediaUrl.endsWith('.mp3'))">
+                <div v-if="message.type === 'audio' || (message.file.mimeType && message.file.mimeType.startsWith('audio/'))">
                   <audio controls class="mt-2 w-100">
-                    <source :src="getMediaUrl(message.mediaUrl)" type="audio/mpeg">
+                    <source :src="getMediaUrl(message.file._id)" type="audio/mpeg">
                     Your browser does not support the audio element.
                   </audio>
-                  <div v-if="message.file" class="file-info">
+                  <div class="file-info">
                     <small>{{ formatFileSize(message.file.size) }} - {{ message.file.originalName }}</small>
                   </div>
                 </div>
 
                 <!-- Sticker -->
-                <div v-if="message.type === 'sticker' || (message.mediaUrl && message.mediaUrl.endsWith('.webp'))">
-                  <img :src="getMediaUrl(message.mediaUrl)" class="sticker mt-2" alt="Sticker" />
+                <div v-if="message.type === 'sticker' || (message.file.mimeType && message.file.mimeType === 'image/webp')">
+                  <img :src="getMediaUrl(message.file._id)" class="sticker mt-2" alt="Sticker" />
                 </div>
               </div>
             </div>
@@ -162,12 +162,12 @@ const isMediaMessage = (message: WhatsAppMessage): boolean => {
     message.type === 'video' || 
     message.type === 'audio' || 
     message.type === 'sticker' ||
-    message.mediaUrl
+    message.file
   );
 }
 
-const getMediaUrl = (mediaPath: string): string => {
-  return whatsappService.getMediaUrl(mediaPath);
+const getMediaUrl = (fileId: string): string => {
+  return whatsappService.getMediaUrl(fileId);
 }
 
 const formatFileSize = (bytes: number): string => {

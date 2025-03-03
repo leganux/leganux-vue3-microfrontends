@@ -9,14 +9,26 @@ export interface WhatsAppStatus {
     hasNewMessages: boolean;
 }
 
+export interface WhatsAppFile {
+    _id: string;
+    originalName: string;
+    path: string;
+    mimeType: string;
+    size: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 export interface WhatsAppMessage {
     messageId: string;
     from: string;
     to?: string;
     type: string;
     content: string;
-    mediaUrl?: string;
+    file?: WhatsAppFile;
     timestamp: number;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface WhatsAppChat {
@@ -41,22 +53,6 @@ export interface SendMediaMessagePayload {
     message?: string;
 }
 
-export interface WhatsAppFile {
-    originalName: string;
-    path: string;
-    mimeType: string;
-    size: number;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-export interface MediaMessage {
-    messageId: string;
-    from: string;
-    to?: string;
-    type: string;
-    content?: string;
-    mediaUrl: string;
-    timestamp: number;
-    file?: WhatsAppFile;
+export interface MediaMessage extends WhatsAppMessage {
+    file: WhatsAppFile;
 }

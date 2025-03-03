@@ -6,8 +6,7 @@ import type {
     SendMediaMessagePayload,
     WhatsAppMessage, 
     WhatsAppStatus,
-    MediaMessage,
-    WhatsAppFile
+    MediaMessage 
 } from '../interface/whatsapp.interface';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -132,19 +131,13 @@ export class WhatsAppService {
         await axios.put(`${this.baseUrl}/chat/${jid}/name`, { name });
     }
 
-    getFileUrl(fileId: string): string {
-        return `${this.baseUrl}/view/${fileId}`;
-    }
-
-    getMediaUrl(mediaPath: string): string {
-        if (!mediaPath) return '';
-        
-        // If it's a file ID (MongoDB ObjectId format), use the view endpoint
-        if (/^[0-9a-fA-F]{24}$/.test(mediaPath)) {
-            return this.getFileUrl(mediaPath);
+    getMediaUrl(fileId: string): string {
+        // If it's a file ID, use the view endpoint
+        if (/^[0-9a-fA-F]{24}$/.test(fileId)) {
+            return `${this.baseUrl}/view/${fileId}`;
         }
         
-        // Otherwise, it's a direct path
-        return `${API_URL}/${mediaPath}`;
+        // If it's a direct path, use the uploads endpoint
+        return `${this.baseUrl}/${fileId}`;
     }
 }
