@@ -21,7 +21,7 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import QRScanner from '../components/QRScanner.vue'
-import WhatsAppChat from '../components/WhatsAppChat.vue'
+import WhatsAppChat from '../../../../components/dashboard/bootstrap/WhatsAppChatComponent.vue'
 import { WhatsAppService } from '../services/whatsapp.service'
 
 const whatsappService = WhatsAppService.getInstance()
@@ -29,7 +29,8 @@ const isConnected = ref(false)
 
 const checkConnection = async () => {
   try {
-    isConnected.value = await whatsappService.getConnectionStatus()
+    const status = await whatsappService.getConnectionStatus()
+    isConnected.value = status.connected
   } catch (error) {
     console.error('Error checking connection:', error)
     isConnected.value = false
