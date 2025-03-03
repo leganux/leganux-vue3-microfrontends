@@ -56,8 +56,48 @@
                class="message p-2 m-2 rounded"
                :class="{ 'sent': message.from === 'me', 'received': message.from !== 'me' }">
             <div class="message-content">
-              {{ message.content }}
-              <img v-if="message.mediaUrl" :src="message.mediaUrl" class="img-fluid mt-2" />
+              <!-- Text content -->
+              <div v-if="message.content && !isMediaMessage(message)">{{ message.content }}</div>
+              
+              <!-- Media Content -->
+              <div v-if="message.mediaUrl" class="media-content">
+                <!-- Image -->
+                <div v-if="message.type === 'image' || (message.mediaUrl && message.mediaUrl.endsWith('.jpg'))">
+                  <img :src="getMediaUrl(message.mediaUrl)" class="img-fluid mt-2" alt="Image" />
+                  <div v-if="message.content" class="media-caption">{{ message.content }}</div>
+                  <div v-if="message.file" class="file-info">
+                    <small>{{ formatFileSize(message.file.size) }} - {{ message.file.originalName }}</small>
+                  </div>
+                </div>
+
+                <!-- Video -->
+                <div v-if="message.type === 'video' || (message.mediaUrl && message.mediaUrl.endsWith('.mp4'))">
+                  <video controls class="img-fluid mt-2">
+                    <source :src="getMediaUrl(message.mediaUrl)" type="video/mp4">
+                    Your browser does not support the video tag.
+                  </video>
+                  <div v-if="message.content" class="media-caption">{{ message.content }}</div>
+                  <div v-if="message.file" class="file-info">
+                    <small>{{ formatFileSize(message.file.size) }} - {{ message.file.originalName }}</small>
+                  </div>
+                </div>
+
+                <!-- Audio -->
+                <div v-if="message.type === 'audio' || (message.mediaUrl && message.mediaUrl.endsWith('.mp3'))">
+                  <audio controls class="mt-2 w-100">
+                    <source :src="getMediaUrl(message.mediaUrl)" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                  </audio>
+                  <div v-if="message.file" class="file-info">
+                    <small>{{ formatFileSize(message.file.size) }} - {{ message.file.originalName }}</small>
+                  </div>
+                </div>
+
+                <!-- Sticker -->
+                <div v-if="message.type === 'sticker' || (message.mediaUrl && message.mediaUrl.endsWith('.webp'))">
+                  <img :src="getMediaUrl(message.mediaUrl)" class="sticker mt-2" alt="Sticker" />
+                </div>
+              </div>
             </div>
             <small class="message-time">
               {{ formatTimestamp(message.timestamp) }}
@@ -72,9 +112,19 @@
               type="text"
               class="form-control"
               placeholder="Type a message..."
-              @keyup.enter="sendMessage"
+              @keyup.enter="sendTextMessage"
             />
-            <button class="btn btn-primary" @click="sendMessage">
+            <input
+              type="file"
+              ref="fileInput"
+              class="d-none"
+              @change="handleFileSelected"
+              accept="image/*,video/*,audio/*"
+            />
+            <button class="btn btn-outline-secondary" @click="openFileInput">
+              <i class="bi bi-paperclip"></i>
+            </button>
+            <button class="btn btn-primary" @click="sendTextMessage">
               <i class="bi bi-send"></i>
             </button>
           </div>
@@ -92,7 +142,6 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { WhatsAppService } from '../services/whatsapp.service'
 import type { WhatsAppChat, WhatsAppMessage } from '../interface/whatsapp.interface'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 const whatsappService = WhatsAppService.getInstance()
 const chats = ref<WhatsAppChat[]>([])
 const selectedChat = ref<WhatsAppChat | null>(null)
@@ -100,10 +149,120 @@ const newMessage = ref('')
 const messagesContainer = ref<HTMLElement | null>(null)
 const isEditingName = ref(false)
 const editedName = ref('')
+const fileInput = ref<HTMLInputElement | null>(null)
 let pollingInterval: NodeJS.Timeout | null = null
 
 const formatPhoneNumber = (jid: string): string => {
-  return jid.replace('@s.whatsapp.net', '')
+  return jid // No need to format since backend handles it
+}
+
+const isMediaMessage = (message: WhatsAppMessage): boolean => {
+  return Boolean(
+    message.type === 'image' || 
+    message.type === 'video' || 
+    message.type === 'audio' || 
+    message.type === 'sticker' ||
+    message.mediaUrl
+  );
+}
+
+const getMediaUrl = (mediaPath: string): string => {
+  return whatsappService.getMediaUrl(mediaPath);
+}
+
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+}
+
+const openFileInput = () => {
+  fileInput.value?.click()
+}
+
+const handleFileSelected = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  if (!input.files?.length) return
+
+  const file = input.files[0]
+  const chat = selectedChat.value
+  if (!chat) return
+
+  try {
+    let type: 'image' | 'video' | 'audio'
+    if (file.type.startsWith('image/')) type = 'image'
+    else if (file.type.startsWith('video/')) type = 'video'
+    else if (file.type.startsWith('audio/')) type = 'audio'
+    else {
+      console.error('Unsupported file type')
+      return
+    }
+
+    // Create FormData to send file
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('type', type)
+    formData.append('to', chat.jid)
+    formData.append('content', newMessage.value || '') // Optional caption
+
+    const message = await whatsappService.sendMediaMessage({
+      to: chat.jid,
+      file: formData,
+      type,
+      message: newMessage.value
+    })
+
+    const updatedChat = { ...chat }
+    if (!updatedChat.messages) {
+      updatedChat.messages = []
+    }
+    updatedChat.messages.push({
+      ...message,
+      from: 'me',
+      content: message.content || ''
+    })
+    selectedChat.value = updatedChat
+    
+    newMessage.value = ''
+    await nextTick()
+    scrollToBottom()
+  } catch (error) {
+    console.error('Error sending media:', error)
+  }
+
+  // Reset file input
+  input.value = ''
+}
+
+const sendTextMessage = async () => {
+  const chat = selectedChat.value
+  if (!chat || !newMessage.value.trim()) return
+
+  try {
+    const message = await whatsappService.sendMessage({
+      to: chat.jid,
+      message: newMessage.value.trim(),
+      type: 'text'
+    })
+
+    const updatedChat = { ...chat }
+    if (!updatedChat.messages) {
+      updatedChat.messages = []
+    }
+    updatedChat.messages.push({
+      ...message,
+      from: 'me'
+    })
+    selectedChat.value = updatedChat
+    
+    newMessage.value = ''
+    await nextTick()
+    scrollToBottom()
+  } catch (error) {
+    console.error('Error sending message:', error)
+  }
 }
 
 const startEditName = () => {
@@ -149,34 +308,6 @@ const selectChat = async (chat: WhatsAppChat) => {
   }
 }
 
-const sendMessage = async () => {
-  const chat = selectedChat.value
-  if (!chat || !newMessage.value.trim()) return
-
-  try {
-    const message = await whatsappService.sendMessage({
-      to: chat.jid,
-      message: newMessage.value.trim()
-    })
-
-    const updatedChat = { ...chat }
-    if (!updatedChat.messages) {
-      updatedChat.messages = []
-    }
-    updatedChat.messages.push({
-      ...message,
-      from: 'me'
-    })
-    selectedChat.value = updatedChat
-    
-    newMessage.value = ''
-    await nextTick()
-    scrollToBottom()
-  } catch (error) {
-    console.error('Error sending message:', error)
-  }
-}
-
 const scrollToBottom = () => {
   if (messagesContainer.value) {
     messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
@@ -190,26 +321,58 @@ const formatTimestamp = (timestamp: number): string => {
   })
 }
 
-const startPolling = () => {
-  pollingInterval = setInterval(async () => {
-    // Update chats list
-    await loadChats()
+const checkForUpdates = async () => {
+  try {
+    const updatedChats = await whatsappService.getChats()
+    chats.value = updatedChats
 
     // Update current chat messages if one is selected
     if (selectedChat.value) {
       const messages = await whatsappService.getChatMessages(selectedChat.value.jid)
-      if (messages.length !== selectedChat.value.messages?.length) {
-        selectedChat.value = { ...selectedChat.value, messages }
-        await nextTick()
-        scrollToBottom()
+      const currentMessagesCount = selectedChat.value.messages?.length || 0
+      
+      // Update the selected chat with latest data from chats list
+      const updatedChatData = updatedChats.find(c => c.jid === selectedChat.value?.jid)
+      if (updatedChatData) {
+        const shouldScroll = messages.length > currentMessagesCount
+        
+        selectedChat.value = {
+          ...updatedChatData,
+          messages,
+          name: updatedChatData.name || selectedChat.value.name
+        }
+        
+        if (shouldScroll) {
+          await nextTick()
+          scrollToBottom()
+        }
       }
     }
-  }, 3000) // Poll every 3 seconds
+  } catch (error) {
+    console.error('Error updating chats:', error)
+  }
+}
+
+const startPolling = () => {
+  pollingInterval = setInterval(async () => {
+    try {
+      // Check status first
+      const status = await whatsappService.getConnectionStatus()
+      
+      // If we have new messages, update everything
+      if (status.hasNewMessages) {
+        await checkForUpdates()
+      }
+    } catch (error) {
+      console.error('Error in polling:', error)
+    }
+  }, 1000) // Poll every second for more responsive updates
 }
 
 onMounted(async () => {
-  await loadChats()
-  startPolling()
+  await loadChats() // Initial load
+  await checkForUpdates() // Initial update
+  startPolling() // Start polling for updates
 })
 
 onUnmounted(() => {
@@ -298,6 +461,36 @@ defineOptions({
 .img-fluid {
   max-width: 100%;
   height: auto;
+  border-radius: 0.25rem;
+}
+
+.sticker {
+  max-width: 150px;
+  height: auto;
+}
+
+.media-caption {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.file-info {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 0.25rem;
+}
+
+.media-content {
+  margin-top: 0.5rem;
+}
+
+audio {
+  max-width: 300px;
+}
+
+video {
+  max-width: 300px;
   border-radius: 0.25rem;
 }
 </style>

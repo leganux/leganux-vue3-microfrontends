@@ -35,9 +35,16 @@ let pollingInterval: NodeJS.Timeout | null = null
 const checkStatus = async () => {
   try {
     const response = await whatsappService.getConnectionStatus()
-    connected.value = response
+    connected.value = response.connected
 
-
+    // If not connected, try to get QR code
+    if (!connected.value) {
+      const qrResponse = await whatsappService.getQRCode()
+      qrCode.value = qrResponse.qr
+    } else {
+      qrCode.value = ''
+      emit('connected')
+    }
   } catch (error) {
     console.error('Error checking status:', error)
   }
@@ -49,7 +56,12 @@ const startPolling = () => {
   pollingInterval = setInterval(checkStatus, 2000) // Poll every 2 seconds
 }
 
-
+const stopPolling = () => {
+  if (pollingInterval) {
+    clearInterval(pollingInterval)
+    pollingInterval = null
+  }
+}
 
 onMounted(async () => {
   await checkStatus()
