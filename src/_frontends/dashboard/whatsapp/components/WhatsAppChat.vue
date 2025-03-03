@@ -62,7 +62,7 @@
               <!-- Media Content -->
               <div v-if="message.file" class="media-content">
                 <!-- Image -->
-                <div v-if="message.type === 'image' || (message.file.mimeType && message.file.mimeType.startsWith('image/'))">
+                <div v-if="message.type === 'image' || message.content ==('Image') ||  (message.file.mimeType && message.file.mimeType.startsWith('image/'))">
                   <img :src="getMediaUrl(message.file._id)" class="img-fluid mt-2" alt="Image" />
                   <div v-if="message.content" class="media-caption">{{ message.content }}</div>
                   <div class="file-info">
@@ -71,7 +71,7 @@
                 </div>
 
                 <!-- Video -->
-                <div v-if="message.type === 'video' || (message.file.mimeType && message.file.mimeType.startsWith('video/'))">
+                <div v-if="message.type === 'video' ||  message.content ==('Video') || (message.file.mimeType && message.file.mimeType.startsWith('video/'))">
                   <video controls class="img-fluid mt-2">
                     <source :src="getMediaUrl(message.file._id)" type="video/mp4">
                     Your browser does not support the video tag.
@@ -83,7 +83,7 @@
                 </div>
 
                 <!-- Audio -->
-                <div v-if="message.type === 'audio' || (message.file.mimeType && message.file.mimeType.startsWith('audio/'))">
+                <div v-if="message.type === 'audio' ||   message.content ==('Audio') ||(message.file.mimeType && message.file.mimeType.startsWith('audio/'))">
                   <audio controls class="mt-2 w-100">
                     <source :src="getMediaUrl(message.file._id)" type="audio/mpeg">
                     Your browser does not support the audio element.
@@ -366,7 +366,7 @@ const startPolling = () => {
     } catch (error) {
       console.error('Error in polling:', error)
     }
-  }, 1000) // Poll every second for more responsive updates
+  }, 5000) // Poll every second for more responsive updates
 }
 
 onMounted(async () => {

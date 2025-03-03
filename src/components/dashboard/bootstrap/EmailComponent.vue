@@ -63,9 +63,7 @@ const emailData = ref<EmailRequest>({
   content: ''
 })
 
-setInterval(() => {
-  console.log(emailData.value.content)
-}, 1000)
+
 
 const sendEmail = async () => {
   try {
